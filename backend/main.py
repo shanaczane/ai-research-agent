@@ -6,6 +6,7 @@ from langchain_groq import ChatGroq
 from langgraph.prebuilt import create_react_agent
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_core.tools import tool
+from langchain_core.messages import AIMessage
 from pydantic import BaseModel
 import os
 
@@ -62,7 +63,7 @@ async def research(request: ResearchRequest):
         messages = result["messages"]
         answer = ""
         for msg in reversed(messages):
-            if hasattr(msg, 'content') and msg.content and not hasattr(msg, 'tool_calls'):
+            if isinstance(msg, AIMessage) and msg.content and not msg.tool_calls:
                 answer = msg.content
                 break
 
