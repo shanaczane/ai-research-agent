@@ -49,32 +49,35 @@ def read_root():
 
 @app.post("/research")
 async def research(request: ResearchRequest):
+    try:
+        # Step 1: Create agent
+        agent = create_react_agent(llm, tools)
 
-     # Step 1: Create agent
-    agent = create_react_agent(llm, tools)
+        # Step 2: Run the agent
+        result = agent.invoke({
+            "messages": [("human", request.question)]
+        })
 
-    # Step 2: Run the agent
-    result = agent.invoke({
-        "messages": [("human", request.question)]
-    })
+        # Step 3: Get the answer
+        messages = result["messages"]
+        answer = ""
+        for msg in reversed(messages):
+            if hasattr(msg, 'content') and msg.content and not hasattr(msg, 'tool_calls'):
+                answer = msg.content
+                break
 
-   
-    # Step 3: Get the answer
-    messages = result["messages"]
+        # Step 4: Save to Supabase
+        supabase.schema("project4").table("research").insert({
+            "question": request.question,
+            "answer": answer,
+        }).execute()
 
-    answer = ""
-    for msg in reversed(messages):
-        if hasattr(msg, 'content') and msg.content and not hasattr(msg, 'tool_calls'):
-            answer = msg.content
-            break
+        # Step 5: Return Answer
+        return {
+            "answer": answer
+            }
 
-    # Step 4: Save to Supabase
-    supabase.schema("project4").table("research").insert({
-        "question": request.question,
-        "answer": answer,
-    }).execute()
-
-    # Step 5: Return Answer
-    return {
-        "answer": answer
-    }
+    except Exception as e:
+        # If agent fails fallback to direct LLM
+        response = llm.invoke(request.question)
+        return {"answer": response.content}
