@@ -5,6 +5,7 @@ from supabase import create_client
 from langchain_groq import ChatGroq
 from langgraph.prebuilt import create_react_agent
 from langchain_community.tools import DuckDuckGoSearchRun
+from langchain_core.tools import tool
 from pydantic import BaseModel
 import os
 
@@ -27,12 +28,17 @@ supabase = create_client(
 
 llm = ChatGroq(
     api_key=os.getenv("GROQ_API_KEY"),
-    model="llama-3.3-70b-versatile"
+    model="llama-3.3-70b-versatile",
+    temperature=0
 )
 
 # Set up search tool
-search = DuckDuckGoSearchRun()
-tools = [search]
+@tool 
+def web_search(query: str) -> str:
+    """Search the web for current information about any topic."""
+    return DuckDuckGoSearchRun().run(query)
+
+tools = [web_search]
 
 class ResearchRequest(BaseModel):
     question: str
@@ -52,8 +58,15 @@ async def research(request: ResearchRequest):
         "messages": [("human", request.question)]
     })
 
+   
     # Step 3: Get the answer
-    answer = result["messages"][-1].content
+    messages = result["messages"]
+
+    answer = ""
+    for msg in reversed(messages):
+        if hasattr(msg, 'content') and msg.content and not hasattr(msg, 'tool_calls'):
+            answer = msg.content
+            break
 
     # Step 4: Save to Supabase
     supabase.schema("project4").table("research").insert({
