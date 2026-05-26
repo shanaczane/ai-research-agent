@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --input-type=module -e \"import * as f from 'next/font/google'; const keys = Object.keys\\(f\\); console.log\\(keys.filter\\(k => k.match\\(/press|vt3|nunito/i\\)\\)\\)\")",
+      "Bash(node -e \"const f = require\\('./node_modules/next/font/google/index.js'\\); console.log\\(Object.keys\\(f\\).filter\\(k => k.match\\(/press|vt3|nunito/i\\)\\)\\)\")",
+      "Bash(Get-Content \"c:\\\\Users\\\\USER\\\\OneDrive\\\\Desktop\\\\ai-research-agent\\\\frontend\\\\node_modules\\\\next\\\\font\\\\google\\\\index.js\" -Raw)",
+      "Bash(node -p \"require\\('fs'\\).readFileSync\\('c:/Users/USER/OneDrive/Desktop/ai-research-agent/frontend/node_modules/next/font/google/index.js', 'utf8'\\).slice\\(0, 200\\)\")"
+    ]
+  }
+}
