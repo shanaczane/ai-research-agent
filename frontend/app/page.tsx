@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 export default function Home() {
   const [question, setQuestion] = useState("");
@@ -253,17 +254,9 @@ export default function Home() {
                   ⚠ {error}
                 </p>
               ) : (
-                <p
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    color: "var(--white)",
-                    fontSize: "0.95rem",
-                    lineHeight: 1.75,
-                    whiteSpace: "pre-wrap",
-                  }}
-                >
-                  {answer}
-                </p>
+                <div className="markdown-body">
+                  <ReactMarkdown>{answer ?? ""}</ReactMarkdown>
+                </div>
               )}
             </div>
 
